@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ContentSphere — Local News Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;--bg2:#10131a;--bg3:#161b26;
+  --surface:#1a2030;--surface2:#212840;
+  --border:#263050;--border2:#334070;
+  --text:#e4e8f5;--text2:#8a94b8;--text3:#4a5470;
+  --accent:#5b8cff;--accent2:#9b7dfa;--accent3:#2ecc9a;
+  --warn:#f5a623;--danger:#f06060;
+  --grad:linear-gradient(135deg,#5b8cff,#9b7dfa);
+  --grad2:linear-gradient(135deg,#2ecc9a,#5b8cff);
+  --glow:0 0 28px rgba(91,140,255,0.22);
+  --r:14px;--rs:8px;--shadow:0 8px 32px rgba(0,0,0,0.5);
+  --fd:'Fraunces',serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.65;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 40% at 15% 20%,rgba(91,140,255,0.06) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 85% 80%,rgba(155,125,250,0.05) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(11,13,18,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 max(20px,calc((100vw - 1180px)/2));gap:6px}
+.logo{font-family:var(--fd);font-size:1.25rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:auto;cursor:pointer;letter-spacing:-0.02em}
+.logo span{font-style:italic}
+.nb{background:none;border:none;color:var(--text2);font-family:var(--fb);font-size:.85rem;font-weight:500;padding:6px 13px;border-radius:var(--rs);cursor:pointer;transition:all .18s;white-space:nowrap}
+.nb:hover{color:var(--text);background:var(--surface)}
+.nb.active{color:var(--accent);background:rgba(91,140,255,0.1)}
+.ndiv{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;cursor:pointer;border:2px solid var(--border);overflow:hidden}
+.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-user{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;background:var(--surface);border-radius:100px;border:1px solid var(--border);cursor:pointer;transition:border-color .18s}
+.nav-user:hover{border-color:var(--accent)}
+.nav-username{font-size:.78rem;font-weight:600}
+.role-badge{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:20px}
+.rb-admin{background:rgba(245,166,35,0.18);color:var(--warn)}
+.rb-member{background:rgba(46,204,154,0.12);color:var(--accent3)}
+.btn-auth{padding:7px 16px;border-radius:100px;font-family:var(--fb);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .18s;border:none}
+.btn-in{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-in:hover{border-color:var(--accent);color:var(--accent)}
+.btn-up{background:var(--grad);color:#fff}
+.btn-up:hover{opacity:.88;transform:translateY(-1px);box-shadow:var(--glow)}
+
+/* ── MAIN ── */
+main{position:relative;z-index:1;padding:0 max(20px,calc((100vw - 1180px)/2))}
+
+/* ── HERO ── */
+.hero{padding:70px 0 50px;text-align:center}
+.hero-eye{display:inline-flex;align-items:center;gap:7px;font-size:.73rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(91,140,255,0.09);border:1px solid rgba(91,140,255,0.22);padding:4px 13px;border-radius:100px;margin-bottom:20px}
+.hero-title{font-family:var(--fd);font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:700;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:1rem;color:var(--text2);max-width:500px;margin:0 auto 30px}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:11px 26px;border-radius:100px;background:var(--grad);color:#fff;font-family:var(--fb);font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--glow)}
+.btn-outline{padding:11px 26px;border-radius:100px;background:transparent;color:var(--text);font-family:var(--fb);font-size:.9rem;font-weight:600;border:1px solid var(--border2);cursor:pointer;transition:all .2s}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── WELCOME TOAST ── */
+.welcome-banner{background:linear-gradient(135deg,rgba(91,140,255,0.12),rgba(155,125,250,0.08));border:1px solid rgba(91,140,255,0.2);border-radius:var(--rs);padding:12px 18px;margin:16px 0 0;font-size:.9rem;display:none;align-items:center;gap:10px;animation:slideIn .4s ease}
+.welcome-banner.show{display:flex}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:7px;padding:18px 0 22px;flex-wrap:wrap}
+.filter-bar h2{font-family:var(--fd);font-size:1.4rem;font-weight:500;letter-spacing:-.02em;margin-right:auto}
+.chip{padding:5px 14px;border-radius:100px;font-size:.78rem;font-weight:500;background:var(--surface);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--border2);color:var(--text)}
+.chip.on{background:rgba(91,140,255,0.13);border-color:rgba(91,140,255,0.4);color:var(--accent)}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;padding-bottom:50px}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .22s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow)}
+.card-media{width:100%;height:170px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2.4rem;overflow:hidden;flex-shrink:0;position:relative}
+.card-media img,.card-media video{width:100%;height:100%;object-fit:cover;display:block}
+.card-media .play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);font-size:2.5rem}
+.card-body{padding:18px;flex:1;display:flex;flex-direction:column}
+.card-cat{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:100px;background:rgba(91,140,255,0.1);color:var(--accent);border:1px solid rgba(91,140,255,0.18);display:inline-block;margin-bottom:8px}
+.card-title{font-family:var(--fd);font-size:1.08rem;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin-bottom:7px}
+.card-summary{font-size:.84rem;color:var(--text2);line-height:1.6;flex:1;margin-bottom:14px}
+.card-footer{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid var(--border)}
+.card-av{width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.card-av img{width:100%;height:100%;object-fit:cover}
+.card-aname{font-size:.76rem;font-weight:500;margin-right:auto}
+.card-stat{display:flex;align-items:center;gap:4px;font-size:.74rem;color:var(--text3)}
+.tags-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:.68rem;padding:2px 8px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);color:var(--text3)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.78);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:32px;width:100%;max-width:460px;box-shadow:0 28px 60px rgba(0,0,0,0.65);transform:translateY(10px);transition:transform .24s;max-height:92vh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0)}
+.modal-lg{max-width:700px}
+.modal-xl{max-width:900px}
+.modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:var(--fd);font-size:1.5rem;font-weight:600;letter-spacing:-.02em}
+.modal-x{background:var(--surface);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;font-size:1rem;flex-shrink:0}
+.modal-x:hover{color:var(--text);border-color:var(--border2)}
+
+/* ── FORM ── */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:.79rem;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.02em}
+.fi{width:100%;padding:10px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--fb);font-size:.88rem;transition:border-color .18s;outline:none}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:var(--text3)}
+textarea.fi{resize:vertical;min-height:90px}
+select.fi{appearance:none;cursor:pointer}
+.fi-wrap{position:relative}
+.fi-wrap .fi{padding-right:42px}
+.eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;padding:3px;font-size:.95rem}
+.eye:hover{color:var(--text)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fdiv{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:.77rem;color:var(--text3)}
+.fdiv::before,.fdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.sbtn{width:100%;padding:10px;border-radius:var(--rs);background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fb);font-size:.87rem;font-weight:500;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:9px}
+.sbtn:hover{border-color:var(--border2);background:var(--surface2)}
+.fswitch{display:flex;justify-content:center;gap:5px;margin-top:18px;font-size:.85rem}
+.fswitch a{color:var(--accent);cursor:pointer;text-decoration:none}
+.fswitch a:hover{text-decoration:underline}
+.bfull{width:100%;padding:12px;background:var(--grad);color:#fff;border:none;border-radius:var(--rs);font-family:var(--fb);font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:7px}
+.bfull:hover{opacity:.9;transform:translateY(-1px)}
+.bfull:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.tags-input{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:100px;background:rgba(91,140,255,0.1);border:1px solid rgba(91,140,255,0.2);color:var(--accent);font-size:.75rem;font-weight:500}
+.tag-chip button{background:none;border:none;color:inherit;cursor:pointer;padding:0;font-size:.85rem;line-height:1}
+
+/* ── ARTICLE VIEW ── */
+.av-media{width:100%;height:260px;background:var(--bg3);border-radius:var(--rs);margin-bottom:20px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;overflow:hidden}
+.av-media img,.av-media video{width:100%;height:100%;object-fit:cover;display:block}
+.av-title{font-family:var(--fd);font-size:1.75rem;font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-bottom:14px}
+.av-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.av-author{display:flex;align-items:center;gap:9px}
+.av-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;overflow:hidden}
+.av-avatar img{width:100%;height:100%;object-fit:cover}
+.action-bar{display:flex;gap:8px;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.abn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:100px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s}
+.abn:hover{border-color:var(--border2);color:var(--text)}
+.abn.liked{background:rgba(91,140,255,0.1);border-color:rgba(91,140,255,0.35);color:var(--accent)}
+.art-body{font-size:.92rem;line-height:1.85;color:var(--text2)}
+.art-body h1,.art-body h2,.art-body h3{color:var(--text);font-family:var(--fd);margin:18px 0 9px}
+.art-body p{margin-bottom:12px}
+.art-body a{color:var(--accent)}
+.art-body code{background:var(--bg3);padding:2px 5px;border-radius:4px;font-family:var(--fm);font-size:.84em}
+.art-body pre{background:var(--bg3);padding:14px;border-radius:var(--rs);overflow-x:auto;margin:12px 0}
+.art-body blockquote{border-left:3px solid var(--accent);padding-left:14px;margin:12px 0;font-style:italic;color:var(--text2)}
+
+/* ── COMMENTS ── */
+.cmts-section{margin-top:28px}
+.cmts-title{font-family:var(--fd);font-size:1.1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.cmt-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.cmt-tab{padding:7px 14px;font-size:.8rem;font-weight:600;background:none;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;position:relative;bottom:-1px}
+.cmt-tab:hover{color:var(--text)}
+.cmt-tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.cmt-status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px}
+.dot-approved{background:var(--accent3)}
+.dot-review{background:var(--warn)}
+.dot-rejected{background:var(--danger)}
+.cmt-form{margin-bottom:20px}
+.cmt-inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px 13px;color:var(--text);font-family:var(--fb);font-size:.88rem;resize:none;outline:none;min-height:75px;transition:border-color .18s}
+.cmt-inp:focus{border-color:var(--accent)}
+.cmt-inp::placeholder{color:var(--text3)}
+.cmt-submit{margin-top:9px;padding:8px 20px;border-radius:100px;background:var(--grad);color:#fff;border:none;font-family:var(--fb);font-weight:600;font-size:.83rem;cursor:pointer;transition:all .2s}
+.cmt-submit:hover{opacity:.9}
+.cmt-item{padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:10px}
+.cmt-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:var(--grad2);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;overflow:hidden}
+.cmt-av img{width:100%;height:100%;object-fit:cover}
+.cmt-body{flex:1}
+.cmt-hdr{display:flex;align-items:baseline;gap:9px;margin-bottom:3px;flex-wrap:wrap}
+.cmt-name{font-size:.82rem;font-weight:600}
+.cmt-time{font-size:.72rem;color:var(--text3);font-family:var(--fm)}
+.cmt-text{font-size:.84rem;color:var(--text2);line-height:1.6}
+.cmt-status{display:inline-block;font-size:.66rem;font-weight:700;padding:1px 7px;border-radius:100px;text-transform:uppercase;letter-spacing:.05em}
+.cs-approved{background:rgba(46,204,154,0.1);color:var(--accent3)}
+.cs-review{background:rgba(245,166,35,0.1);color:var(--warn)}
+.cs-rejected{background:rgba(240,96,96,0.1);color:var(--danger)}
+.cmt-actions{display:flex;gap:6px;margin-top:6px}
+.cmt-act-btn{padding:3px 10px;border-radius:100px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid;transition:all .18s}
+.cab-approve{background:rgba(46,204,154,0.08);border-color:rgba(46,204,154,0.25);color:var(--accent3)}
+.cab-reject{background:rgba(240,96,96,0.08);border-color:rgba(240,96,96,0.22);color:var(--danger)}
+.cmt-scores{font-size:.68rem;color:var(--text3);font-family:var(--fm);margin-top:4px}
+
+/* ── PROFILE ── */
+.profile-wrap{max-width:900px;margin:0 auto;padding:30px 0 60px}
+.profile-hdr{display:flex;gap:22px;align-items:flex-start;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.profile-pic{width:88px;height:88px;border-radius:50%;flex-shrink:0;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;color:#fff;border:3px solid var(--border);overflow:hidden;cursor:pointer;position:relative}
+.profile-pic img{width:100%;height:100%;object-fit:cover}
+.profile-pic .pic-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;font-size:.75rem;color:#fff;text-align:center}
+.profile-pic:hover .pic-overlay{display:flex}
+.pname{font-family:var(--fd);font-size:1.6rem;font-weight:600;letter-spacing:-.02em}
+.puname{color:var(--text3);font-size:.87rem;font-family:var(--fm)}
+.pbio{color:var(--text2);font-size:.88rem;margin:7px 0}
+.pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:24px}
+.pstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.pstat-num{font-family:var(--fd);font-size:1.7rem;font-weight:700;color:var(--accent)}
+.pstat-lbl{font-size:.74rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.stitle{font-family:var(--fd);font-size:1.1rem;font-weight:600;margin-bottom:13px;display:flex;align-items:center;gap:9px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border)}
+.profile-tabs{display:flex;gap:3px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.ptab{padding:9px 18px;font-size:.83rem;font-weight:600;background:none;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;position:relative;bottom:-1px}
+.ptab:hover{color:var(--text)}
+.ptab.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── ADMIN ── */
+.admin-wrap{padding:28px 0 60px}
+.admin-tabs{display:flex;gap:3px;margin-bottom:22px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.atab{padding:9px 18px;font-size:.83rem;font-weight:600;background:none;border:none;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;position:relative;bottom:-1px}
+.atab:hover{color:var(--text)}
+.atab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.mod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.mod-hdr{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.mod-text{font-size:.88rem;color:var(--text2);margin-bottom:11px;line-height:1.5}
+.mod-actions{display:flex;gap:7px}
+.bapprove{padding:6px 14px;border-radius:var(--rs);background:rgba(46,204,154,0.1);border:1px solid rgba(46,204,154,0.28);color:var(--accent3);font-size:.79rem;font-weight:600;cursor:pointer;transition:all .18s}
+.bapprove:hover{background:rgba(46,204,154,0.18)}
+.breject{padding:6px 14px;border-radius:var(--rs);background:rgba(240,96,96,0.09);border:1px solid rgba(240,96,96,0.24);color:var(--danger);font-size:.79rem;font-weight:600;cursor:pointer;transition:all .18s}
+.breject:hover{background:rgba(240,96,96,0.16)}
+.threat{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.tl{background:rgba(46,204,154,0.09);color:var(--accent3)}
+.tm{background:rgba(245,166,35,0.09);color:var(--warn)}
+.th{background:rgba(240,96,96,0.09);color:var(--danger)}
+.tc{background:rgba(240,96,96,0.18);color:#ff4040}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:28px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.sc-num{font-family:var(--fd);font-size:2rem;font-weight:700}
+.sc-lbl{font-size:.78rem;color:var(--text3)}
+.domain-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.domain-name{font-family:var(--fm);font-size:.84rem;flex:1}
+.domain-reason{font-size:.77rem;color:var(--text3);flex:2}
+.integration-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.int-platform{font-weight:600;font-size:.9rem;flex:1}
+.int-url{font-size:.78rem;color:var(--text3);font-family:var(--fm);flex:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{padding:11px 18px;border-radius:var(--rs);font-size:.84rem;font-weight:500;box-shadow:var(--shadow);border:1px solid;animation:tIn .28s ease;max-width:320px;display:flex;align-items:center;gap:9px;pointer-events:all}
+.ts{background:#0e2419;border-color:#1a4028;color:var(--accent3)}
+.te{background:#250e0e;border-color:#451818;color:var(--danger)}
+.ti{background:#0d1525;border-color:#182844;color:var(--accent)}
+.tw{background:#251a0d;border-color:#453018;color:var(--warn)}
+@keyframes tIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── SPINNER ── */
+.spin-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s}
+.spin-overlay.on{opacity:1;pointer-events:all}
+.spinner{width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .65s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:55px 16px}
+.empty .icon{font-size:2.8rem;margin-bottom:14px;opacity:.4;display:block}
+.empty h3{font-family:var(--fd);margin-bottom:7px}
+.empty p{color:var(--text3);font-size:.87rem}
+
+/* ── PAGE VIEWS ── */
+.pv{display:none}
+.pv.on{display:block}
+
+/* ── SERVER BANNER ── */
+.srv-banner{background:rgba(240,96,96,0.07);border:1px solid rgba(240,96,96,0.22);border-radius:var(--rs);padding:13px 17px;margin:18px 0 0;font-size:.84rem;color:var(--danger);display:none;align-items:center;gap:9px}
+.srv-banner.on{display:flex}
+.srv-banner code{background:rgba(240,96,96,0.1);padding:2px 7px;border-radius:4px;font-family:var(--fm);font-size:.78rem}
+
+/* ── MISC ── */
+.danger-box{background:rgba(240,96,96,0.06);border:1px solid rgba(240,96,96,0.2);border-radius:var(--rs);padding:12px 16px;margin-top:12px;font-size:.84rem;color:var(--danger)}
+.info-box{background:rgba(91,140,255,0.06);border:1px solid rgba(91,140,255,0.18);border-radius:var(--rs);padding:12px 16px;margin-top:12px;font-size:.84rem;color:var(--accent)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hero{padding:44px 0 32px}
+  .grid{grid-template-columns:1fr}
+  .pstats,.stats-grid{grid-template-columns:repeat(2,1fr)}
+  .modal{padding:22px}
+  .frow{grid-template-columns:1fr}
+  .profile-hdr{flex-direction:column;align-items:center;text-align:center}
+  .filter-bar h2{width:100%}
+  .nav-username{display:none}
+}
+@media(max-width:480px){
+  nav{padding:0 14px}main{padding:0 14px}
+  .hero-title{font-size:2rem}
+  .pstats,.stats-grid{grid-template-columns:1fr 1fr}
+  .atab,.ptab{padding:7px 11px;font-size:.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="spin-overlay" id="spinner"><div class="spinner"></div></div>
+<div id="toasts"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <span class="logo" onclick="goPage('home')">Content<span>Sphere</span></span>
+  <button class="nb on"  id="nb-home"     onclick="goPage('home')">Home</button>
+  <button class="nb"     id="nb-articles" onclick="goPage('articles')">Articles</button>
+  <div class="ndiv" id="nd1" style="display:none"></div>
+  <button class="nb" id="nb-write"  onclick="goPage('write')"   style="display:none">✍️ Write</button>
+  <button class="nb" id="nb-profile" onclick="goPage('profile')" style="display:none">👤 Profile</button>
+  <button class="nb" id="nb-admin"  onclick="goPage('admin')"   style="display:none">🛡️ Admin</button>
+  <div class="ndiv"></div>
+  <div id="auth-btns" style="display:flex;gap:7px;align-items:center">
+    <button class="btn-auth btn-in"  onclick="openM('m-login')">Sign In</button>
+    <button class="btn-auth btn-up"  onclick="openM('m-register')">Join Free</button>
+  </div>
+  <div id="user-nav" style="display:none;cursor:pointer" onclick="goPage('profile')">
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-av"><span id="nav-av-txt">?</span></div>
+      <span class="nav-username" id="nav-dispname">User</span>
+      <span class="role-badge rb-member" id="nav-role">Member</span>
+    </div>
+  </div>
+  <button class="nb" id="logout-nb" onclick="doLogout()" style="display:none;color:var(--text3)">Out</button>
+</nav>
+
+<main>
+
+<!-- ═══ HOME ═══ -->
+<div class="pv on" id="pv-home">
+  <div class="srv-banner" id="srv-banner">
+    ⚠️ Cannot reach server. Make sure Flask is running and visit
+    <code>http://127.0.0.1:5000/frontend</code>
+  </div>
+  <div class="welcome-banner" id="welcome-banner">
+    <span id="welcome-text"></span>
+  </div>
+  <div class="hero">
+    <div class="hero-eye">✦ Local News Platform</div>
+    <h1 class="hero-title">Your community's <em>voice</em> — moderated by AI</h1>
+    <p class="hero-sub">Read local news, share articles, photos & videos. Smart multilingual comment moderation powered by Naïve-Bayes.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="goPage('articles')">Browse News</button>
+      <button class="btn-outline" onclick="ctaWrite()">Start Writing →</button>
+    </div>
+  </div>
+  <div class="filter-bar" id="home-filter-bar">
+    <h2>Latest Stories</h2>
+  </div>
+  <div class="grid" id="home-grid">
+    <div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>
+  </div>
+</div>
+
+<!-- ═══ ARTICLES ═══ -->
+<div class="pv" id="pv-articles">
+  <div class="filter-bar" style="padding-top:28px" id="art-filter-bar">
+    <h2>All Articles</h2>
+  </div>
+  <div class="grid" id="art-grid">
+    <div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>
+  </div>
+</div>
+
+<!-- ═══ WRITE ═══ -->
+<div class="pv" id="pv-write">
+  <div style="max-width:760px;margin:0 auto;padding:36px 0 60px">
+    <h1 style="font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.02em;margin-bottom:24px">Publish a Post</h1>
+    <div class="fg">
+      <label class="fl">Post Type</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88rem">
+          <input type="radio" name="post-type" value="text" checked onchange="switchPostType('text')"> 📝 Article
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88rem">
+          <input type="radio" name="post-type" value="image" onchange="switchPostType('image')"> 🖼️ Photo
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.88rem">
+          <input type="radio" name="post-type" value="video" onchange="switchPostType('video')"> 🎬 Video
+        </label>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Title *</label><input class="fi" id="w-title" type="text" placeholder="Headline…"></div>
+    <div class="frow">
+      <div class="fg">
+        <label class="fl">Category</label>
+        <select class="fi" id="w-cat">
+          <option value="general">General</option>
+          <option value="tech">Technology</option>
+          <option value="travel">Travel</option>
+          <option value="medicine">Medicine</option>
+          <option value="business">Business</option>
+          <option value="sport">Sport</option>
+          <option value="lifestyle">Lifestyle</option>
+          <option value="politics">Politics</option>
+          <option value="science">Science</option>
+          <option value="entertainment">Entertainment</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Tags (Enter to add)</label><input class="fi" id="w-tag-inp" type="text" placeholder="tag…" onkeydown="addTag(event)"><div class="tags-input" id="tags-wrap"></div></div>
+    </div>
+    <div class="fg" id="w-text-section">
+      <label class="fl">Content * <span style="color:var(--text3);font-weight:400">(Markdown)</span></label>
+      <textarea class="fi" id="w-content" rows="12" placeholder="Write your article here…"></textarea>
+    </div>
+    <div class="fg" id="w-image-section" style="display:none">
+      <label class="fl">Upload Photo *</label>
+      <input class="fi" type="file" id="w-image-file" accept="image/*">
+      <div class="info-box" style="margin-top:8px">Supports JPG, PNG, GIF, WebP. Max 64MB.</div>
+    </div>
+    <div class="fg" id="w-video-section" style="display:none">
+      <label class="fl">Upload Video *</label>
+      <input class="fi" type="file" id="w-video-file" accept="video/*">
+      <div class="info-box" style="margin-top:8px">Supports MP4, WebM, MOV. Max 64MB.</div>
+    </div>
+    <button class="bfull" id="pub-btn" onclick="submitPost()">Publish →</button>
+  </div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div class="pv" id="pv-profile">
+  <div class="profile-wrap">
+    <div class="profile-hdr">
+      <div class="profile-pic" id="pp-pic" onclick="document.getElementById('avatar-upload').click()">
+        <span id="pp-init">?</span>
+        <div class="pic-overlay">📷 Change</div>
+      </div>
+      <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      <div>
+        <div class="pname" id="pp-name">Loading…</div>
+        <div class="puname" id="pp-uname">@username</div>
+        <div class="pbio"   id="pp-bio">No bio yet.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+          <span class="role-badge" id="pp-role" style="font-size:.72rem;padding:3px 10px">Member</span>
+          <span style="font-size:.79rem;color:var(--text3)" id="pp-joined"></span>
+        </div>
+      </div>
+    </div>
+    <div class="pstats">
+      <div class="pstat"><div class="pstat-num" id="ps-art">0</div><div class="pstat-lbl">Articles</div></div>
+      <div class="pstat"><div class="pstat-num" id="ps-cmt">0</div><div class="pstat-lbl">Comments</div></div>
+      <div class="pstat"><div class="pstat-num" id="ps-rep">1.0</div><div class="pstat-lbl">Reputation</div></div>
+      <div class="pstat"><div class="pstat-num" id="ps-type">Member</div><div class="pstat-lbl">Role</div></div>
+    </div>
+    <div class="profile-tabs">
+      <button class="ptab on" onclick="profileTab('posts',this)">📰 My Posts</button>
+      <button class="ptab"    onclick="profileTab('edit',this)">✏️ Edit Profile</button>
+      <button class="ptab"    onclick="profileTab('password',this)">🔑 Password</button>
+      <button class="ptab"    onclick="profileTab('upgrade',this)">🛡️ Become Admin</button>
+    </div>
+    <div id="pt-posts">
+      <div class="grid" id="my-posts-grid">
+        <div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>
+      </div>
+    </div>
+    <div id="pt-edit" style="display:none">
+      <div class="fg"><label class="fl">Full Name</label><input class="fi" id="ep-name" type="text"></div>
+      <div class="fg"><label class="fl">Bio</label><textarea class="fi" id="ep-bio" rows="3"></textarea></div>
+      <div class="fg"><label class="fl">Website</label><input class="fi" id="ep-web" type="url" placeholder="https://…"></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="ep-email" type="email"></div>
+      <button class="bfull" onclick="saveProfile()">Save Changes</button>
+    </div>
+    <div id="pt-password" style="display:none">
+      <div class="fg"><label class="fl">Current Password</label><div class="fi-wrap"><input class="fi" id="cp-old" type="password"><button class="eye" onclick="togglePwd('cp-old',this)">👁️</button></div></div>
+      <div class="fg"><label class="fl">New Password</label><div class="fi-wrap"><input class="fi" id="cp-new" type="password"><button class="eye" onclick="togglePwd('cp-new',this)">👁️</button></div></div>
+      <div class="fg"><label class="fl">Confirm New Password</label><div class="fi-wrap"><input class="fi" id="cp-conf" type="password"><button class="eye" onclick="togglePwd('cp-conf',this)">👁️</button></div></div>
+      <button class="bfull" onclick="changePassword()">Change Password</button>
+    </div>
+    <div id="pt-upgrade" style="display:none">
+      <div class="info-box">To become an Admin, verify your identity with your current password. Your username will change to <strong>admin</strong>.</div>
+      <div class="fg" style="margin-top:14px"><label class="fl">Confirm Username (must type "admin")</label><input class="fi" id="up-uname" type="text" placeholder="admin"></div>
+      <div class="fg"><label class="fl">Your Current Password</label><div class="fi-wrap"><input class="fi" id="up-pass" type="password"><button class="eye" onclick="togglePwd('up-pass',this)">👁️</button></div></div>
+      <div class="danger-box">⚠️ This action changes your username to "admin" permanently. Only one admin account is allowed.</div>
+      <button class="bfull" style="background:linear-gradient(135deg,#f5a623,#f06060)" onclick="upgradeToAdmin()">Become Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div class="pv" id="pv-admin">
+  <div class="admin-wrap">
+    <h1 style="font-family:var(--fd);font-size:1.85rem;font-weight:700;letter-spacing:-.02em;margin-bottom:20px">🛡️ Admin Dashboard</h1>
+    <div class="admin-tabs">
+      <button class="atab on"  onclick="aTab('overview',this)">📊 Overview</button>
+      <button class="atab"     onclick="aTab('moderate',this)">💬 Moderate</button>
+      <button class="atab"     onclick="aTab('domains',this)">🚫 Domains</button>
+      <button class="atab"     onclick="aTab('users',this)">👥 Users</button>
+      <button class="atab"     onclick="aTab('integrations',this)">🔗 Integrations</button>
+      <button class="atab"     onclick="aTab('modlog',this)">📋 Log</button>
+    </div>
+    <div id="at-overview">
+      <div class="stats-grid" id="stats-grid">
+        <div class="sc"><div class="sc-num">—</div><div class="sc-lbl">Loading…</div></div>
+      </div>
+    </div>
+    <div id="at-moderate" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="chip on" id="mod-filter-btn" onclick="loadModComments('under_review',this)">⏳ Pending</button>
+        <button class="chip" onclick="loadModComments('auto_approved',this)">✅ Approved</button>
+        <button class="chip" onclick="loadModComments('auto_rejected',this)">❌ Rejected</button>
+      </div>
+      <div id="mod-list"><div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div></div>
+    </div>
+    <div id="at-domains" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+        <input class="fi" id="d-domain" placeholder="e.g. spam.com" style="flex:1;min-width:140px">
+        <select class="fi" id="d-threat" style="width:130px">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+        <input class="fi" id="d-reason" placeholder="Reason…" style="flex:2;min-width:140px">
+        <button class="btn-primary" style="padding:10px 18px;border-radius:var(--rs);flex-shrink:0" onclick="blockDomain()">Block</button>
+      </div>
+      <div id="domains-list"><div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div></div>
+    </div>
+    <div id="at-users" style="display:none">
+      <div id="users-list"><div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div></div>
+    </div>
+    <div id="at-integrations" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+        <select class="fi" id="int-platform" style="width:160px">
+          <option value="Disqus">Disqus</option>
+          <option value="WordPress">WordPress</option>
+          <option value="Slack">Slack</option>
+          <option value="Telegram">Telegram</option>
+          <option value="Custom">Custom Webhook</option>
+        </select>
+        <input class="fi" id="int-url" placeholder="Webhook URL…" style="flex:2;min-width:180px">
+        <input class="fi" id="int-key" placeholder="API Key (optional)" style="flex:1;min-width:140px">
+        <button class="btn-primary" style="padding:10px 18px;border-radius:var(--rs);flex-shrink:0" onclick="addIntegration()">Connect</button>
+      </div>
+      <div id="int-list"><div class="empty"><span class="icon">🔗</span><h3>No integrations yet</h3></div></div>
+    </div>
+    <div id="at-modlog" style="display:none">
+      <div id="modlog-list"><div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- LOGIN -->
+<div class="overlay" id="m-login">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Welcome back</div><button class="modal-x" onclick="closeM('m-login')">✕</button></div>
+    <button class="sbtn" onclick="toast('Google login not configured yet','warn')">
+      <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <button class="sbtn" onclick="toast('GitHub login not configured yet','warn')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      Continue with GitHub
+    </button>
+    <div class="fdiv">or sign in with email</div>
+    <div class="fg"><label class="fl">Username</label><input class="fi" id="l-user" type="text" placeholder="Your username" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="fg"><label class="fl">Password</label><div class="fi-wrap"><input class="fi" id="l-pass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"><button class="eye" onclick="togglePwd('l-pass',this)">👁️</button></div></div>
+    <button class="bfull" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div style="text-align:center;margin-top:12px"><a onclick="switchM('m-login','m-forgot')" style="color:var(--text3);font-size:.8rem;cursor:pointer">Forgot password?</a></div>
+    <div class="fswitch">No account? <a onclick="switchM('m-login','m-register')">Create one →</a></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="overlay" id="m-register">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Create account</div><button class="modal-x" onclick="closeM('m-register')">✕</button></div>
+    <button class="sbtn" onclick="toast('Google signup not configured yet','warn')">
+      <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign up with Google
+    </button>
+    <div class="fdiv">or use email</div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Full Name *</label><input class="fi" id="r-name" type="text" placeholder="Jane Doe"></div>
+      <div class="fg"><label class="fl">Username *</label><input class="fi" id="r-user" type="text" placeholder="janedoe"></div>
+    </div>
+    <div class="fg"><label class="fl">Email *</label><input class="fi" id="r-email" type="email" placeholder="jane@example.com"></div>
+    <div class="fg"><label class="fl">Phone <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fi" id="r-phone" type="tel" placeholder="+1 555 000 0000"></div>
+    <div class="fg"><label class="fl">Password *</label><div class="fi-wrap"><input class="fi" id="r-pass" type="password" placeholder="Min 6 characters"><button class="eye" onclick="togglePwd('r-pass',this)">👁️</button></div></div>
+    <button class="bfull" id="reg-btn" onclick="doRegister()">Create Account →</button>
+    <div class="fswitch">Have an account? <a onclick="switchM('m-register','m-login')">Sign in →</a></div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD -->
+<div class="overlay" id="m-forgot">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Forgot Password</div><button class="modal-x" onclick="closeM('m-forgot')">✕</button></div>
+    <p style="color:var(--text2);font-size:.88rem;margin-bottom:16px">Enter your email and we'll generate a reset token. In dev mode the token appears in your browser console and the server terminal.</p>
+    <div class="fg"><label class="fl">Email Address</label><input class="fi" id="fp-email" type="email" placeholder="your@email.com"></div>
+    <button class="bfull" id="fp-btn" onclick="forgotPassword()">Send Reset Token</button>
+    <div id="fp-result" style="display:none"></div>
+    <div class="fswitch"><a onclick="switchM('m-forgot','m-login')">← Back to Sign In</a></div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD -->
+<div class="overlay" id="m-reset">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">Reset Password</div><button class="modal-x" onclick="closeM('m-reset')">✕</button></div>
+    <div class="fg"><label class="fl">Reset Token</label><input class="fi" id="rp-token" type="text" placeholder="Paste token here…"></div>
+    <div class="fg"><label class="fl">New Password</label><div class="fi-wrap"><input class="fi" id="rp-pass" type="password" placeholder="Min 6 characters"><button class="eye" onclick="togglePwd('rp-pass',this)">👁️</button></div></div>
+    <button class="bfull" onclick="resetPassword()">Reset Password</button>
+    <div class="fswitch"><a onclick="switchM('m-reset','m-login')">← Back to Sign In</a></div>
+  </div>
+</div>
+
+<!-- ARTICLE VIEW -->
+<div class="overlay" id="m-article">
+  <div class="modal modal-xl">
+    <div class="modal-hdr" style="margin-bottom:0"><div></div><button class="modal-x" onclick="closeM('m-article')">✕</button></div>
+    <div id="article-view" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── CONFIG ──────────────────────────────────────────────────────
+// '' = same origin (correct when served via Flask /frontend)
+const API = '';
+
+// ── STATE ───────────────────────────────────────────────────────
+let currentUser = null;
+let currentCat  = '';
+let postTags    = [];
+let activeArticleId = null;
+
+// ── UTILS ───────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const SS = () => $('spinner').classList.add('on');
+const SH = () => $('spinner').classList.remove('on');
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, type='info') {
+  const ic = {success:'✓',error:'✕',info:'ℹ',warn:'⚠'};
+  const el = document.createElement('div');
+  el.className = `toast t${type[0]}`;
+  el.innerHTML = `<span>${ic[type]||'ℹ'}</span><span>${esc(msg)}</span>`;
+  $('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 4200);
+}
+
+function openM(id)   { $(id).classList.add('open');    document.body.style.overflow='hidden'; }
+function closeM(id)  { $(id).classList.remove('open'); document.body.style.overflow=''; }
+function switchM(a,b){ closeM(a); openM(b); }
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target===o) closeM(o.id); });
+});
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>closeM(o.id));
+});
+
+function togglePwd(id, btn) {
+  const i=$(id);
+  i.type = i.type==='password' ? 'text' : 'password';
+  btn.textContent = i.type==='password' ? '👁️' : '🙈';
+}
+
+function fmtDate(s) {
+  if(!s) return '';
+  try { return new Date(s).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }
+  catch { return s; }
+}
+
+function catEmoji(c) {
+  const m={tech:'💻',travel:'✈️',lifestyle:'🌿',general:'📰',medicine:'🏥',
+           business:'💼',sport:'⚽',politics:'🏛️',science:'🔬',entertainment:'🎬'};
+  return m[c]||'📰';
+}
+
+// ── API HELPER ──────────────────────────────────────────────────
+async function api(path, opts={}) {
+  const cfg = { credentials:'include', mode:'cors',
+                headers:{'Content-Type':'application/json'} };
+  if(opts.method)  cfg.method  = opts.method;
+  if(opts.body)    cfg.body    = opts.body;
+  if(opts.formData){ delete cfg.headers; cfg.body = opts.formData; cfg.method='POST'; }
+
+  let res;
+  try { res = await fetch(API+path, cfg); }
+  catch { $('srv-banner').classList.add('on'); throw new Error('network'); }
+
+  $('srv-banner').classList.remove('on');
+  if(res.status===401){ clearUser(); throw Object.assign(new Error('401'),{status:401}); }
+  if(res.status===403){ throw Object.assign(new Error('403'),{status:403}); }
+  return res.json();
+}
+
+// ── PAGES ───────────────────────────────────────────────────────
+const PAGES = ['home','articles','write','profile','admin'];
+function goPage(page) {
+  PAGES.forEach(p => { $(f`pv-${p}`).classList.toggle('on', p===page); });
+  document.querySelectorAll('.nb[id^="nb-"]').forEach(b=>b.classList.remove('on'));
+  const nb=$(`nb-${page}`);
+  if(nb) nb.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='home'||page==='articles') loadArticles(page);
+  if(page==='profile') loadProfile();
+  if(page==='admin')   initAdmin();
+}
+
+// template literal helper for class names
+function f(strings,...vals){ return strings.reduce((a,s,i)=>a+s+(vals[i]??''),''); }
+// fix: just use string concat
+function pvId(p){ return 'pv-'+p; }
+
+// override goPage to use correct id
+function goPage(page) {
+  PAGES.forEach(p => {
+    const el = document.getElementById('pv-'+p);
+    if(el) el.classList.toggle('on', p===page);
+  });
+  document.querySelectorAll('.nb[id^="nb-"]').forEach(b=>b.classList.remove('on'));
+  const nb = document.getElementById('nb-'+page);
+  if(nb) nb.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='home'||page==='articles') loadArticles(page);
+  if(page==='profile') loadProfile();
+  if(page==='admin')   initAdmin();
+}
+
+// ── BUILD CATEGORY CHIPS ────────────────────────────────────────
+const CATS = ['','tech','travel','medicine','business','sport','lifestyle','politics','science','entertainment'];
+const CAT_LABELS = {'':'All','tech':'Tech','travel':'Travel','medicine':'Medicine',
+                    'business':'Business','sport':'Sport','lifestyle':'Lifestyle',
+                    'politics':'Politics','science':'Science','entertainment':'Entertainment'};
+
+function buildFilterBars() {
+  ['home-filter-bar','art-filter-bar'].forEach(barId => {
+    const bar = $(barId);
+    const h2  = bar.querySelector('h2');
+    bar.innerHTML = '';
+    bar.appendChild(h2);
+    CATS.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'chip' + (cat===''?' on':'');
+      btn.textContent = CAT_LABELS[cat]||cat;
+      btn.onclick = () => filterCat(cat, btn, barId);
+      bar.appendChild(btn);
+    });
+  });
+}
+buildFilterBars();
+
+function filterCat(cat, btn, barId) {
+  currentCat = cat;
+  document.querySelectorAll(`#${barId} .chip`).forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  const pg = document.getElementById('pv-home').classList.contains('on') ? 'home' : 'articles';
+  loadArticles(pg);
+}
+
+// ── AUTH ────────────────────────────────────────────────────────
+async function checkSession() {
+  try {
+    const d = await api('/api/session');
+    if(d.authenticated) setUser(d.user);
+  } catch {}
+}
+
+function setUser(u) {
+  currentUser = u;
+  const init = (u.display_name||u.full_name||'?')[0].toUpperCase();
+
+  // nav avatar
+  const navAvEl = $('nav-av');
+  if(u.avatar) {
+    navAvEl.innerHTML = `<img src="${esc(u.avatar)}" alt="">`;
+  } else {
+    $('nav-av-txt').textContent = init;
+  }
+  $('nav-dispname').textContent = u.display_name||u.full_name;
+  const rb = $('nav-role');
+  rb.textContent = u.user_type==='admin'?'Admin':'Member';
+  rb.className   = 'role-badge '+(u.user_type==='admin'?'rb-admin':'rb-member');
+
+  $('auth-btns').style.display  = 'none';
+  $('user-nav').style.display   = 'block';
+  $('logout-nb').style.display  = 'block';
+  $('nb-write').style.display   = 'block';
+  $('nb-profile').style.display = 'block';
+  $('nd1').style.display        = 'block';
+  if(u.user_type==='admin') $('nb-admin').style.display = 'block';
+}
+
+function clearUser() {
+  currentUser = null;
+  $('auth-btns').style.display  = 'flex';
+  $('user-nav').style.display   = 'none';
+  $('logout-nb').style.display  = 'none';
+  $('nb-write').style.display   = 'none';
+  $('nb-profile').style.display = 'none';
+  $('nb-admin').style.display   = 'none';
+  $('nd1').style.display        = 'none';
+}
+
+async function doLogin() {
+  const username=$('l-user').value.trim(), password=$('l-pass').value;
+  if(!username||!password) return toast('Fill in all fields','error');
+  const btn=$('login-btn'); btn.disabled=true; btn.textContent='Signing in…';
+  SS();
+  try {
+    const d = await api('/api/login',{method:'POST',body:JSON.stringify({username,password})});
+    SH(); btn.disabled=false; btn.textContent='Sign In';
+    if(d.success){
+      setUser(d.user);
+      closeM('m-login');
+      $('l-pass').value='';
+      // Welcome banner
+      const wb=$('welcome-banner'), wt=$('welcome-text');
+      wt.textContent = d.welcome||`Welcome back, ${d.user.display_name}! 👋`;
+      wb.classList.add('show');
+      setTimeout(()=>wb.classList.remove('show'),5000);
+      loadArticles('home');
+    } else toast(d.message||'Login failed','error');
+  } catch(e){ SH(); btn.disabled=false; btn.textContent='Sign In';
+    if(e.status!==401) toast('Cannot reach server','error'); }
+}
+
+async function doRegister() {
+  const fn=$('r-name').value.trim(), un=$('r-user').value.trim(),
+        em=$('r-email').value.trim(), ph=$('r-phone').value.trim(),
+        pw=$('r-pass').value;
+  if(!fn||!un||!em||!pw) return toast('Fill required fields','error');
+  if(pw.length<6) return toast('Password min 6 characters','error');
+  const btn=$('reg-btn'); btn.disabled=true; btn.textContent='Creating…';
+  SS();
+  try {
+    const body={full_name:fn,username:un,email:em,password:pw};
+    if(ph) body.phone=ph;
+    const d = await api('/api/register',{method:'POST',body:JSON.stringify(body)});
+    SH(); btn.disabled=false; btn.textContent='Create Account →';
+    if(d.success){
+      closeM('m-register');
+      toast(d.message,'success');
+      ['r-name','r-user','r-email','r-phone','r-pass'].forEach(id=>$(id).value='');
+    } else toast(d.message||'Registration failed','error');
+  } catch(e){ SH(); btn.disabled=false; btn.textContent='Create Account →';
+    if(e.status!==401) toast('Cannot reach server','error'); }
+}
+
+async function doLogout() {
+  try{ await api('/api/logout',{method:'POST'}); }catch{}
+  clearUser(); goPage('home'); toast('Signed out','info');
+}
+
+async function forgotPassword() {
+  const email=$('fp-email').value.trim();
+  if(!email) return toast('Enter your email','error');
+  const btn=$('fp-btn'); btn.disabled=true; btn.textContent='Sending…';
+  SS();
+  try {
+    const d = await api('/api/forgot-password',{method:'POST',body:JSON.stringify({email})});
+    SH(); btn.disabled=false; btn.textContent='Send Reset Token';
+    const res=$('fp-result');
+    if(d.success){
+      res.style.display='block';
+      res.className='info-box';
+      res.innerHTML = `Token generated! Check your server terminal for the reset link.<br>
+        <strong style="font-family:var(--fm);font-size:.8rem">Dev token: ${esc(d.dev_token||'')}</strong>
+        <br><a onclick="$('rp-token').value='${esc(d.dev_token||'')}';switchM('m-forgot','m-reset')"
+          style="color:var(--accent);cursor:pointer;font-size:.82rem">→ Go to Reset Password</a>`;
+    } else { res.style.display='block'; res.className='danger-box'; res.textContent=d.message; }
+  } catch(e){ SH(); btn.disabled=false; btn.textContent='Send Reset Token'; toast('Error','error'); }
+}
+
+async function resetPassword() {
+  const token=$('rp-token').value.trim(), pw=$('rp-pass').value;
+  if(!token||!pw) return toast('Fill all fields','error');
+  SS();
+  try {
+    const d = await api('/api/reset-password',{method:'POST',body:JSON.stringify({token,new_password:pw})});
+    SH();
+    if(d.success){ closeM('m-reset'); toast(d.message,'success'); openM('m-login'); }
+    else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+// Check reset token in URL on load
+function checkURLToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('reset_token');
+  if(token){ $('rp-token').value = token; openM('m-reset'); }
+}
+
+// ── WRITE ───────────────────────────────────────────────────────
+function ctaWrite(){ if(currentUser) goPage('write'); else openM('m-login'); }
+
+function switchPostType(t) {
+  $('w-text-section').style.display  = t==='text'  ? '' : 'none';
+  $('w-image-section').style.display = t==='image' ? '' : 'none';
+  $('w-video-section').style.display = t==='video' ? '' : 'none';
+}
+
+function addTag(e) {
+  if(e.key!=='Enter') return; e.preventDefault();
+  const inp=$('w-tag-inp'), val=inp.value.trim().replace(/,/g,'');
+  if(!val||postTags.includes(val)||postTags.length>=8){ inp.value=''; return; }
+  postTags.push(val); renderTags(); inp.value='';
+}
+function removeTag(t){ postTags=postTags.filter(x=>x!==t); renderTags(); }
+function renderTags(){
+  $('tags-wrap').innerHTML=postTags.map(t=>
+    `<span class="tag-chip">${esc(t)}<button onclick="removeTag('${esc(t)}')">×</button></span>`).join('');
+}
+
+async function submitPost() {
+  if(!currentUser){ openM('m-login'); return; }
+  const title   = $('w-title').value.trim();
+  const category= $('w-cat').value;
+  const type    = document.querySelector('input[name="post-type"]:checked').value;
+  if(!title) return toast('Title is required','error');
+
+  const btn=$('pub-btn'); btn.disabled=true; btn.textContent='Publishing…';
+  SS();
+
+  try {
+    let d;
+    if(type==='text'){
+      const content=$('w-content').value.trim();
+      if(!content){ btn.disabled=false; btn.textContent='Publish →'; SH(); return toast('Content required','error'); }
+      d = await api('/api/articles',{method:'POST',body:JSON.stringify({
+        title,content,category,tags:postTags.join(',')})});
+    } else {
+      const fileEl = type==='image' ? $('w-image-file') : $('w-video-file');
+      if(!fileEl.files[0]){ btn.disabled=false; btn.textContent='Publish →'; SH(); return toast('Please select a file','error'); }
+      const fd = new FormData();
+      fd.append('title',title); fd.append('category',category);
+      fd.append('tags',postTags.join(',')); fd.append('content','');
+      fd.append(type, fileEl.files[0]);
+      d = await api('/api/articles',{formData:fd});
+    }
+    SH(); btn.disabled=false; btn.textContent='Publish →';
+    if(d.success){
+      toast('Post published! 🎉','success');
+      ['w-title','w-content'].forEach(id=>$(id).value='');
+      postTags=[]; renderTags();
+      goPage('home');
+    } else toast(d.message||'Failed','error');
+  } catch(e){ SH(); btn.disabled=false; btn.textContent='Publish →';
+    if(e.status!==401) toast('Error publishing','error'); }
+}
+
+// ── ARTICLES ────────────────────────────────────────────────────
+async function loadArticles(target='home') {
+  const gid = target==='home'?'home-grid':'art-grid';
+  const grid = $(gid);
+  grid.innerHTML=`<div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>`;
+  try {
+    let url=`/api/articles?limit=12&sort=latest`;
+    if(currentCat) url+=`&category=${currentCat}`;
+    const d=await api(url);
+    if(d.success && d.articles?.length>0)
+      grid.innerHTML=d.articles.map(renderCard).join('');
+    else
+      grid.innerHTML=`<div class="empty"><span class="icon">📭</span><h3>No posts yet</h3><p>Be the first to publish something!</p></div>`;
+  } catch {
+    grid.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Cannot reach server</h3><p>Visit <strong>http://127.0.0.1:5000/frontend</strong></p></div>`;
+  }
+}
+
+function mediaThumb(a) {
+  if(a.media_type==='image' && a.media_url)
+    return `<img src="${esc(a.media_url)}" alt="" onerror="this.parentNode.innerHTML='${catEmoji(a.category)}'">`;
+  if(a.media_type==='video' && a.media_url)
+    return `<video src="${esc(a.media_url)}" muted></video><div class="play-icon">▶️</div>`;
+  return catEmoji(a.category);
+}
+
+function renderCard(a) {
+  const init=(a.author.full_name||a.author.username||'?')[0].toUpperCase();
+  const avHtml = a.author.avatar
+    ? `<img src="${esc(a.author.avatar)}" alt="">`
+    : init;
+  const tags=(a.tags||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  return `
+  <div class="card" onclick="viewArticle(${a.article_id})">
+    <div class="card-media">${mediaThumb(a)}</div>
+    <div class="card-body">
+      <span class="card-cat">${catEmoji(a.category)} ${esc(a.category)}</span>
+      <div class="card-title">${esc(a.title)}</div>
+      <div class="card-summary">${esc(a.summary||'')}</div>
+      ${tags?`<div class="tags-row">${tags}</div>`:''}
+      <div class="card-footer">
+        <div class="card-av">${avHtml}</div>
+        <span class="card-aname">${esc(a.author.full_name||a.author.username)}</span>
+        <div class="card-stat">👁 ${a.views||0}</div>
+        <div class="card-stat">❤️ ${a.likes||0}</div>
+        <div class="card-stat">💬 ${a.comment_count||0}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ARTICLE VIEW ─────────────────────────────────────────────────
+async function viewArticle(id) {
+  activeArticleId = id;
+  // record view
+  fetch(API+`/api/articles/${id}/view`,{method:'POST',credentials:'include'}).catch(()=>{});
+  SS();
+  try {
+    const d=await api(`/api/articles?limit=200`);
+    SH();
+    const art=(d.articles||[]).find(a=>a.article_id===id);
+    if(!art) return toast('Article not found','error');
+    renderArticleView(art);
+    openM('m-article');
+    loadComments(id);
+  } catch{ SH(); toast('Error loading article','error'); }
+}
+
+function renderArticleView(a) {
+  const init=(a.author.full_name||a.author.username||'?')[0].toUpperCase();
+  const avHtml = a.author.avatar
+    ? `<img src="${esc(a.author.avatar)}" alt="">`
+    : init;
+  const mediaHtml = a.media_type==='image' && a.media_url
+    ? `<img src="${esc(a.media_url)}" alt="">`
+    : a.media_type==='video' && a.media_url
+    ? `<video src="${esc(a.media_url)}" controls style="width:100%;height:100%"></video>`
+    : `<span>${catEmoji(a.category)}</span>`;
+  const tags=(a.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+
+  const cmtForm = currentUser
+    ? `<div class="cmt-form">
+        <textarea class="cmt-inp" id="cmt-inp-${a.article_id}" placeholder="Write a comment… (multilingual supported)"></textarea>
+        <button class="cmt-submit" onclick="postComment(${a.article_id})">Post Comment</button>
+       </div>`
+    : `<p style="color:var(--text3);font-size:.84rem;margin-bottom:16px">
+        <a onclick="closeM('m-article');openM('m-login')" style="color:var(--accent);cursor:pointer">Sign in</a>
+        to leave a comment.
+       </p>`;
+
+  $('article-view').innerHTML=`
+    <div class="av-media">${mediaHtml}</div>
+    <div class="av-title">${esc(a.title)}</div>
+    <div class="av-meta">
+      <div class="av-author">
+        <div class="av-avatar">${avHtml}</div>
+        <div>
+          <div style="font-weight:600;font-size:.88rem">${esc(a.author.full_name||a.author.username)}</div>
+          <div style="font-size:.74rem;color:var(--text3)">${fmtDate(a.created_at)} · ${a.reading_time||1}min read</div>
+        </div>
+      </div>
+      <span class="card-cat" style="font-size:.66rem">${catEmoji(a.category)} ${esc(a.category)}</span>
+      ${tags?`<div class="tags-row" style="margin:0">${tags}</div>`:''}
+    </div>
+    <div class="action-bar">
+      <button class="abn" id="like-${a.article_id}" onclick="likeArticle(${a.article_id})">
+        ❤️ <span id="lc-${a.article_id}">${a.likes||0}</span> Likes
+      </button>
+      <div class="abn" style="cursor:default">👁 ${a.views||0} Views</div>
+      <div class="abn" style="cursor:default">💬 <span id="cmt-count-${a.article_id}">${a.comment_count||0}</span></div>
+    </div>
+    <div class="art-body">${a.content_html||esc(a.summary||'')}</div>
+    <div class="cmts-section">
+      <div class="cmts-title">Comments</div>
+      ${cmtForm}
+      <div id="cmts-${a.article_id}">
+        <div style="color:var(--text3);font-size:.83rem;padding:10px 0">Loading comments…</div>
+      </div>
+    </div>`;
+}
+
+async function likeArticle(id) {
+  if(!currentUser){ openM('m-login'); return; }
+  try {
+    const d=await api(`/api/articles/${id}/like`,{method:'POST'});
+    if(d.success){
+      $(`like-${id}`).classList.add('liked');
+      $(`lc-${id}`).textContent=d.likes;
+    }
+  } catch{}
+}
+
+// ── COMMENTS ─────────────────────────────────────────────────────
+async function loadComments(articleId) {
+  const el=$(`cmts-${articleId}`);
+  if(!el) return;
+  try {
+    const d=await api(`/api/comments?article_id=${articleId}`);
+    const cmts=d.comments||[];
+    const summary=d.summary||{};
+    const isOwnerOrAdmin = currentUser && (
+      currentUser.user_type==='admin' || cmts.some(c=>c.username===currentUser.username)
+    );
+    // check if viewer is owner by seeing if summary has data (only returned to owners)
+    const canSeeAll = Object.keys(summary).length > 0;
+
+    // render tabs for owners/admins
+    let tabsHtml='';
+    if(canSeeAll){
+      const appr=summary['auto_approved']||0;
+      const rej =summary['auto_rejected']||0;
+      const rev =summary['under_review']||0;
+      tabsHtml=`<div class="cmt-tabs">
+        <button class="cmt-tab on" id="ct-all-${articleId}" onclick="filterCmts(${articleId},'all',this)">All (${cmts.length})</button>
+        <button class="cmt-tab" onclick="filterCmts(${articleId},'auto_approved',this)"><span class="cmt-status-dot dot-approved"></span>Approved (${appr})</button>
+        <button class="cmt-tab" onclick="filterCmts(${articleId},'under_review',this)"><span class="cmt-status-dot dot-review"></span>Review (${rev})</button>
+        <button class="cmt-tab" onclick="filterCmts(${articleId},'auto_rejected',this)"><span class="cmt-status-dot dot-rejected"></span>Rejected (${rej})</button>
+      </div>`;
+    }
+
+    el.innerHTML = tabsHtml + `<div id="cmts-inner-${articleId}">${renderComments(cmts, canSeeAll)}</div>`;
+    el._allCmts = cmts;
+    el._canSeeAll = canSeeAll;
+  } catch {
+    if(el) el.innerHTML='<div style="color:var(--text3);font-size:.83rem">Could not load comments.</div>';
+  }
+}
+
+function filterCmts(articleId, status, btn) {
+  const el=$(`cmts-${articleId}`);
+  document.querySelectorAll(`[id^="ct-"]`).forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const cmts=el._allCmts||[];
+  const filtered=status==='all'?cmts:cmts.filter(c=>c.status===status);
+  $(`cmts-inner-${articleId}`).innerHTML=renderComments(filtered, el._canSeeAll);
+}
+
+function renderComments(cmts, showMod) {
+  if(cmts.length===0) return '<div style="color:var(--text3);font-size:.83rem;padding:10px 0">No comments to show.</div>';
+  return cmts.map(c => {
+    const init=(c.username||'?')[0].toUpperCase();
+    const avHtml=c.avatar?`<img src="${esc(c.avatar)}" alt="">`:init;
+    const statusHtml = showMod
+      ? `<span class="cmt-status cs-${c.status==='auto_approved'?'approved':c.status==='auto_rejected'?'rejected':'review'}">${c.status.replace('auto_','').replace('_',' ')}</span>` : '';
+    const scoresHtml = showMod && (c.adult_score>0||c.nb_spam_prob>0.1)
+      ? `<div class="cmt-scores">adult:${(c.adult_score||0).toFixed(2)} spam:${(c.nb_spam_prob||0).toFixed(2)} lang:${c.language||'?'}</div>` : '';
+    const modBtns = showMod
+      ? `<div class="cmt-actions">
+          <button class="cmt-act-btn cab-approve" onclick="moderateCmt(${c.comment_id},'approve',${activeArticleId})">✓ Approve</button>
+          <button class="cmt-act-btn cab-reject"  onclick="moderateCmt(${c.comment_id},'reject', ${activeArticleId})">✕ Reject</button>
+         </div>` : '';
+    const reasonHtml = showMod && c.reason
+      ? `<div style="font-size:.7rem;color:var(--text3);margin-top:3px">🔍 ${esc(c.reason)}</div>` : '';
+    return `
+      <div class="cmt-item" id="cmt-${c.comment_id}">
+        <div class="cmt-av">${avHtml}</div>
+        <div class="cmt-body">
+          <div class="cmt-hdr">
+            <span class="cmt-name">${esc(c.full_name||c.username)}</span>
+            <span class="cmt-time">${fmtDate(c.created_at)}</span>
+            ${statusHtml}
+          </div>
+          <div class="cmt-text">${esc(c.comment_text)}</div>
+          ${reasonHtml}${scoresHtml}${modBtns}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function postComment(articleId) {
+  if(!currentUser){ openM('m-login'); return; }
+  const inp=$(`cmt-inp-${articleId}`);
+  const text=inp.value.trim();
+  if(!text) return toast('Write something first','error');
+  SS();
+  try {
+    const d=await api('/api/comments',{method:'POST',body:JSON.stringify({comment_text:text,article_id:articleId})});
+    SH();
+    inp.value='';
+    if(d.success){ toast(d.message,'success'); loadComments(articleId); }
+    else toast(d.message||'Blocked by moderation','warn');
+  } catch{ SH(); toast('Error posting comment','error'); }
+}
+
+async function moderateCmt(commentId, action, articleId) {
+  SS();
+  try {
+    const d=await api(`/api/comments/${commentId}/moderate`,{method:'PUT',body:JSON.stringify({action})});
+    SH();
+    if(d.success){ toast(`Comment ${action}d`,'success'); loadComments(articleId); }
+    else toast(d.message||'Error','error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+// ── PROFILE ──────────────────────────────────────────────────────
+function profileTab(tab, btn) {
+  ['posts','edit','password','upgrade'].forEach(t=>{
+    $(`pt-${t}`).style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(tab==='posts') loadMyPosts();
+}
+
+async function loadProfile() {
+  if(!currentUser){ goPage('home'); return; }
+  try {
+    const d=await api('/api/profile');
+    if(!d.success) return;
+    const u=d.profile;
+    const init=(u.full_name||'?')[0].toUpperCase();
+    // avatar
+    const ppPic=$('pp-pic');
+    ppPic.querySelector('#pp-init').textContent=init;
+    if(u.avatar){
+      ppPic.querySelector('#pp-init').style.display='none';
+      const existing=ppPic.querySelector('img');
+      if(existing) existing.remove();
+      const img=document.createElement('img');
+      img.src=u.avatar; img.style.cssText='width:100%;height:100%;object-fit:cover';
+      ppPic.insertBefore(img, ppPic.querySelector('.pic-overlay'));
+    }
+    $('pp-name').textContent  = u.full_name;
+    $('pp-uname').textContent = `@${u.username}`;
+    $('pp-bio').textContent   = u.bio||'No bio yet.';
+    $('pp-joined').textContent= `Joined ${fmtDate(u.created_at)}`;
+    $('ps-art').textContent   = u.total_articles||0;
+    $('ps-cmt').textContent   = u.total_comments||0;
+    $('ps-rep').textContent   = (u.reputation||1).toFixed(1);
+    $('ps-type').textContent  = u.user_type==='admin'?'Admin':'Member';
+    const pr=$('pp-role');
+    pr.textContent=u.user_type==='admin'?'Admin':'Member';
+    pr.className='role-badge '+(u.user_type==='admin'?'rb-admin':'rb-member');
+    // prefill edit form
+    $('ep-name').value  = u.full_name||'';
+    $('ep-bio').value   = u.bio||'';
+    $('ep-web').value   = u.website||'';
+    $('ep-email').value = u.email||'';
+    loadMyPosts();
+  } catch{ toast('Error loading profile','error'); }
+}
+
+async function loadMyPosts() {
+  const grid=$('my-posts-grid');
+  grid.innerHTML=`<div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>`;
+  if(!currentUser) return;
+  try {
+    const d=await api('/api/articles?limit=100');
+    const mine=(d.articles||[]).filter(a=>a.author.username===currentUser.username);
+    grid.innerHTML=mine.length>0
+      ?mine.slice(0,9).map(renderCard).join('')
+      :`<div class="empty"><span class="icon">📝</span><h3>No posts yet</h3><p>Head to Write to publish your first post.</p></div>`;
+  } catch{}
+}
+
+async function saveProfile() {
+  const body={full_name:$('ep-name').value.trim(),bio:$('ep-bio').value.trim(),
+              website:$('ep-web').value.trim(),email:$('ep-email').value.trim()};
+  SS();
+  try {
+    const d=await api('/api/profile',{method:'PUT',body:JSON.stringify(body)});
+    SH();
+    if(d.success){ toast('Profile updated ✓','success'); loadProfile(); }
+    else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function uploadAvatar(input) {
+  if(!input.files[0]) return;
+  const fd=new FormData(); fd.append('avatar',input.files[0]);
+  SS();
+  try {
+    const d=await api('/api/profile/avatar',{formData:fd});
+    SH();
+    if(d.success){
+      toast('Profile picture updated! 📸','success');
+      currentUser.avatar=d.avatar;
+      loadProfile();
+      // update nav avatar
+      $('nav-av').innerHTML=`<img src="${esc(d.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+    } else toast(d.message,'error');
+  } catch{ SH(); toast('Error uploading avatar','error'); }
+}
+
+async function changePassword() {
+  const old=$('cp-old').value, nw=$('cp-new').value, cf=$('cp-conf').value;
+  if(!old||!nw||!cf) return toast('Fill all fields','error');
+  if(nw!==cf) return toast('Passwords do not match','error');
+  if(nw.length<6) return toast('Min 6 characters','error');
+  SS();
+  try {
+    const d=await api('/api/change-password',{method:'POST',body:JSON.stringify({old_password:old,new_password:nw})});
+    SH();
+    if(d.success){ toast(d.message,'success'); ['cp-old','cp-new','cp-conf'].forEach(i=>$(i).value=''); }
+    else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function upgradeToAdmin() {
+  const uname=$('up-uname').value.trim(), pass=$('up-pass').value;
+  if(!uname||!pass) return toast('Fill all fields','error');
+  SS();
+  try {
+    const d=await api('/api/upgrade-to-admin',{method:'POST',body:JSON.stringify({admin_username:uname,password:pass})});
+    SH();
+    if(d.success){
+      toast(d.message,'success');
+      // refresh session
+      const s=await api('/api/session');
+      if(s.authenticated){ setUser(s.user); loadProfile(); }
+    } else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────
+function aTab(tab, btn) {
+  ['overview','moderate','domains','users','integrations','modlog'].forEach(t=>{
+    $(`at-${t}`).style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(tab==='overview')     loadStats();
+  if(tab==='moderate')     loadModComments('under_review', $('mod-filter-btn'));
+  if(tab==='domains')      loadDomains();
+  if(tab==='users')        loadUsers();
+  if(tab==='integrations') loadIntegrations();
+  if(tab==='modlog')       loadModLog();
+}
+
+async function initAdmin() {
+  if(!currentUser||currentUser.user_type!=='admin'){ goPage('home'); toast('Admin access required','error'); return; }
+  loadStats();
+}
+
+async function loadStats() {
+  const el=$('stats-grid');
+  try {
+    const d=await api('/api/admin/stats');
+    if(!d.success) throw new Error();
+    const s=d.stats;
+    el.innerHTML=[
+      {icon:'👥',num:s.total_users,lbl:'Members'},
+      {icon:'🛡️',num:s.total_admins,lbl:'Admins'},
+      {icon:'📰',num:s.total_articles,lbl:'Articles'},
+      {icon:'💬',num:s.total_comments,lbl:'Total Comments'},
+      {icon:'✅',num:s.approved_comments,lbl:'Approved'},
+      {icon:'⏳',num:s.pending_comments,lbl:'Pending'},
+      {icon:'❌',num:s.rejected_comments,lbl:'Rejected'},
+      {icon:'📅',num:s.today_comments,lbl:"Today's Comments"},
+      {icon:'📅',num:s.today_articles,lbl:"Today's Articles"},
+      {icon:'🚫',num:s.blocked_domains,lbl:'Blocked Domains'},
+    ].map(i=>`<div class="sc"><div style="font-size:1.4rem;margin-bottom:7px">${i.icon}</div><div class="sc-num">${i.num??'—'}</div><div class="sc-lbl">${i.lbl}</div></div>`).join('');
+  } catch {
+    el.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Cannot load stats</h3></div>`;
+  }
+}
+
+async function loadModComments(status='under_review', btn) {
+  if(btn){ document.querySelectorAll('#at-moderate .chip').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); }
+  const el=$('mod-list');
+  el.innerHTML=`<div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>`;
+  try {
+    const d=await api(`/api/admin/comments?status=${status}`);
+    const cmts=d.comments||[];
+    if(cmts.length===0){
+      el.innerHTML=`<div class="empty"><span class="icon">✅</span><h3>Nothing here</h3><p>No ${status.replace('_',' ')} comments.</p></div>`;
+      return;
+    }
+    el.innerHTML=cmts.map(c=>`
+      <div class="mod-card">
+        <div class="mod-hdr">
+          <div class="cmt-av" style="width:26px;height:26px;font-size:.65rem;flex-shrink:0">${(c.username||'?')[0].toUpperCase()}</div>
+          <strong style="font-size:.84rem">${esc(c.full_name||c.username)}</strong>
+          <span class="cmt-time">${fmtDate(c.created_at)}</span>
+          <span style="font-size:.75rem;color:var(--text3);font-family:var(--fm)">art: ${esc(c.article_title||'—')}</span>
+          ${c.adult_score>0?`<span style="font-size:.7rem;color:var(--danger)">🔞 adult:${c.adult_score.toFixed(2)}</span>`:''}
+          ${c.nb_spam_prob>0.3?`<span style="font-size:.7rem;color:var(--warn)">🤖 spam:${c.nb_spam_prob.toFixed(2)}</span>`:''}
+        </div>
+        <div class="mod-text">${esc(c.comment_text)}</div>
+        ${c.reason?`<div style="font-size:.72rem;color:var(--text3);margin-bottom:9px">🔍 ${esc(c.reason)}</div>`:''}
+        <div class="mod-actions">
+          <button class="bapprove" onclick="adminModerate(${c.comment_id},'approve')">✓ Approve</button>
+          <button class="breject"  onclick="adminModerate(${c.comment_id},'reject')">✕ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch {
+    el.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Error loading</h3></div>`;
+  }
+}
+
+async function adminModerate(id, action) {
+  SS();
+  try {
+    const d=await api(`/api/comments/${id}/moderate`,{method:'PUT',body:JSON.stringify({action})});
+    SH();
+    if(d.success){ toast(`Comment ${action}d`,'success'); loadModComments('under_review'); }
+    else toast(d.message||'Error','error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function loadDomains() {
+  const el=$('domains-list');
+  el.innerHTML=`<div style="color:var(--text3);font-size:.83rem;padding:10px 0">Loading…</div>`;
+  try {
+    const d=await api('/api/admin/blocked-domains');
+    const doms=d.domains||[];
+    el.innerHTML=doms.length===0
+      ?`<div class="empty"><span class="icon">🚫</span><h3>No blocked domains</h3></div>`
+      :doms.map(d=>`
+        <div class="domain-row">
+          <span class="domain-name">${esc(d.domain)}</span>
+          <span class="domain-reason">${esc(d.reason||'—')}</span>
+          <span class="threat t${d.threat_level[0]}">${d.threat_level}</span>
+          <button onclick="removeDomain(${d.domain_id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:.85rem">✕</button>
+        </div>`).join('');
+  } catch{ el.innerHTML=`<div style="color:var(--text3);font-size:.83rem">Error loading.</div>`; }
+}
+
+async function blockDomain() {
+  const domain=$('d-domain').value.trim();
+  const threat=$('d-threat').value;
+  const reason=$('d-reason').value.trim();
+  if(!domain) return toast('Enter a domain','error');
+  SS();
+  try {
+    const d=await api('/api/admin/blocked-domains',{method:'POST',body:JSON.stringify({domain,threat_level:threat,reason})});
+    SH();
+    if(d.success){ toast('Domain blocked!','success'); $('d-domain').value=''; $('d-reason').value=''; loadDomains(); }
+    else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function removeDomain(id) {
+  SS();
+  try {
+    await api(`/api/admin/blocked-domains/${id}`,{method:'DELETE'});
+    SH(); toast('Domain removed','info'); loadDomains();
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function loadUsers() {
+  const el=$('users-list');
+  el.innerHTML=`<div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>`;
+  try {
+    const d=await api('/api/admin/users');
+    const users=d.users||[];
+    if(users.length===0){ el.innerHTML=`<div class="empty"><span class="icon">👥</span><h3>No users</h3></div>`; return; }
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.83rem">
+      <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
+        <th style="padding:9px 8px;color:var(--text2)">User</th>
+        <th style="padding:9px 8px;color:var(--text2)">Email</th>
+        <th style="padding:9px 8px;color:var(--text2)">Role</th>
+        <th style="padding:9px 8px;color:var(--text2)">Articles</th>
+        <th style="padding:9px 8px;color:var(--text2)">Comments</th>
+        <th style="padding:9px 8px;color:var(--text2)">Status</th>
+        <th style="padding:9px 8px;color:var(--text2)">Action</th>
+      </tr></thead>
+      <tbody>${users.map(u=>`
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 8px"><strong>${esc(u.full_name)}</strong><br><span style="color:var(--text3)">@${esc(u.username)}</span></td>
+          <td style="padding:9px 8px;color:var(--text2)">${esc(u.email)}</td>
+          <td style="padding:9px 8px"><span class="role-badge ${u.user_type==='admin'?'rb-admin':'rb-member'}">${u.user_type}</span></td>
+          <td style="padding:9px 8px;text-align:center">${u.total_articles||0}</td>
+          <td style="padding:9px 8px;text-align:center">${u.total_comments||0}</td>
+          <td style="padding:9px 8px"><span style="color:${u.is_active?'var(--accent3)':'var(--danger)'}">${u.is_active?'Active':'Suspended'}</span></td>
+          <td style="padding:9px 8px">
+            <button onclick="toggleUser(${u.user_id})" style="padding:4px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:.75rem;cursor:pointer">
+              ${u.is_active?'Suspend':'Activate'}
+            </button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch{ el.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Error loading users</h3></div>`; }
+}
+
+async function toggleUser(uid) {
+  SS();
+  try {
+    const d=await api(`/api/admin/users/${uid}/toggle`,{method:'PUT',body:'{}'});
+    SH(); if(d.success){ toast(d.message,'success'); loadUsers(); } else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function loadIntegrations() {
+  const el=$('int-list');
+  try {
+    const d=await api('/api/admin/integrations');
+    const ints=d.integrations||[];
+    el.innerHTML=ints.length===0
+      ?`<div class="empty"><span class="icon">🔗</span><h3>No integrations yet</h3><p>Connect external platforms above.</p></div>`
+      :ints.map(i=>`
+        <div class="integration-card">
+          <div style="font-size:1.4rem">${{Disqus:'💬',WordPress:'🌐',Slack:'💼',Telegram:'✈️',Custom:'🔧'}[i.platform]||'🔗'}</div>
+          <span class="int-platform">${esc(i.platform)}</span>
+          <span class="int-url">${esc(i.webhook_url)}</span>
+          <span style="font-size:.75rem;color:${i.is_active?'var(--accent3)':'var(--text3)'}">${i.is_active?'Active':'Inactive'}</span>
+          <button onclick="removeIntegration(${i.integration_id})" style="background:none;border:none;color:var(--danger);cursor:pointer">✕</button>
+        </div>`).join('');
+  } catch{ el.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Error loading</h3></div>`; }
+}
+
+async function addIntegration() {
+  const platform=$('int-platform').value;
+  const url=$('int-url').value.trim();
+  const key=$('int-key').value.trim();
+  if(!url) return toast('Webhook URL required','error');
+  SS();
+  try {
+    const d=await api('/api/admin/integrations',{method:'POST',body:JSON.stringify({platform,webhook_url:url,api_key:key})});
+    SH();
+    if(d.success){ toast(d.message,'success'); $('int-url').value=''; $('int-key').value=''; loadIntegrations(); }
+    else toast(d.message,'error');
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function removeIntegration(id) {
+  SS();
+  try {
+    await api(`/api/admin/integrations/${id}`,{method:'DELETE'});
+    SH(); toast('Integration removed','info'); loadIntegrations();
+  } catch{ SH(); toast('Error','error'); }
+}
+
+async function loadModLog() {
+  const el=$('modlog-list');
+  el.innerHTML=`<div class="empty"><span class="icon">⏳</span><h3>Loading…</h3></div>`;
+  try {
+    const d=await api('/api/admin/mod-log');
+    const logs=d.logs||[];
+    el.innerHTML=logs.length===0
+      ?`<div class="empty"><span class="icon">📋</span><h3>No log entries yet</h3></div>`
+      :`<table style="width:100%;border-collapse:collapse;font-size:.8rem">
+        <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
+          <th style="padding:8px;color:var(--text2)">Action</th>
+          <th style="padding:8px;color:var(--text2)">By</th>
+          <th style="padding:8px;color:var(--text2)">Comment (excerpt)</th>
+          <th style="padding:8px;color:var(--text2)">Time</th>
+        </tr></thead>
+        <tbody>${logs.map(l=>`
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px"><span style="color:${l.action==='approve'?'var(--accent3)':'var(--danger)'};font-weight:600">${l.action==='approve'?'✓ Approved':'✕ Rejected'}</span></td>
+            <td style="padding:8px;color:var(--text2)">@${esc(l.username)}</td>
+            <td style="padding:8px;color:var(--text3);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.comment_text||'')}</td>
+            <td style="padding:8px;color:var(--text3);font-family:var(--fm)">${fmtDate(l.created_at)}</td>
+          </tr>`).join('')}
+        </tbody></table>`;
+  } catch{ el.innerHTML=`<div class="empty"><span class="icon">❌</span><h3>Error loading log</h3></div>`; }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+(async()=>{
+  checkURLToken();
+  await checkSession();
+  loadArticles('home');
+})();
+</script>
+</body>
+</html>
