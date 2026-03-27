@@ -1,3 +1,8 @@
-flask
+Flask
+gunicorn
 flask-cors
-Iangdetect
+requests
+numpy
+pandas
+SQLAlchemy
+tensorflow==2.15.0
