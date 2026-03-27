@@ -637,14 +637,6 @@ def register():
     try:
         cur.execute('''INSERT INTO users(username,password,email,full_name,surname,phone)
                        VALUES(?,?,?,?,?,?)''',
-            (_hash(d['password']), d['email'], d['full_name'], surname,
-             d.get('phone',''), d.get('username','')))
-        # NOTE: username stored separately above is wrong — fix:
-        uid = cur.lastrowid
-        # actually do it right:
-        db_connection.rollback()
-        cur.execute('''INSERT INTO users(username,password,email,full_name,surname,phone)
-                       VALUES(?,?,?,?,?,?)''',
             (d['username'], _hash(d['password']), d['email'],
              d['full_name'], surname, d.get('phone','')))
         uid = cur.lastrowid
@@ -660,44 +652,54 @@ def login():
     d = request.get_json() or {}
     if not d.get('username') or not d.get('password'):
         return jsonify(success=False, message="Username and password required")
-    cur = db_connection.cursor()
-    cur.execute('''SELECT user_id,username,password,full_name,surname,user_type,
-                          avatar,is_active,total_articles,total_comments,reputation
-                   FROM users WHERE username=?''', (d['username'],))
-    u = cur.fetchone()
-    if not u or not _verify(d['password'], u['password']):
-        return jsonify(success=False, message="Invalid username or password")
-    if not u['is_active']:
-        return jsonify(success=False, message="Account suspended")
+    try:
+        cur = db_connection.cursor()
+        cur.execute('''SELECT user_id,username,password,full_name,surname,user_type,
+                              avatar,is_active,total_articles,total_comments,reputation
+                       FROM users WHERE username=?''', (d['username'],))
+        u = cur.fetchone()
+        if not u or not _verify(d['password'], u['password']):
+            return jsonify(success=False, message="Invalid username or password")
+        if not u['is_active']:
+            return jsonify(success=False, message="Account suspended")
 
-    db_connection.execute("UPDATE users SET last_login=? WHERE user_id=?",
-                          (datetime.now(), u['user_id']))
-    db_connection.commit()
+        db_connection.execute("UPDATE users SET last_login=? WHERE user_id=?",
+                              (datetime.now(), u['user_id']))
+        db_connection.commit()
 
-    session.update(user_id=u['user_id'], username=u['username'],
-                   user_type=u['user_type'], full_name=u['full_name'])
+        session['user_id']   = u['user_id']
+        session['username']  = u['username']
+        session['user_type'] = u['user_type']
+        session['full_name'] = u['full_name']
 
-    surname    = u['surname'] or u['full_name'].split()[-1]
-    disp_name  = f"Admin({surname})" if u['user_type'] == 'admin' else u['full_name']
-    welcome    = f"Welcome back, {disp_name}! 👋"
+        raw_surname = u['surname'] if u['surname'] else u['full_name'].split()[-1]
+        disp_name   = f"Admin({raw_surname})" if u['user_type'] == 'admin' else u['full_name']
+        welcome     = f"Welcome back, {disp_name}!"
 
-    # unread notifications
-    cur.execute("SELECT notif_id,message,type,created_at FROM notifications "
+        try:
+            cur.execute(
+                "SELECT notif_id,message,type,created_at FROM notifications "
                 "WHERE user_id=? AND is_read=0 ORDER BY created_at DESC LIMIT 10",
                 (u['user_id'],))
-    notifs = [dict(r) for r in cur.fetchall()]
+            notifs = [dict(r) for r in cur.fetchall()]
+        except Exception:
+            notifs = []
 
-    return jsonify(success=True, welcome=welcome, user={
-        'user_id':        u['user_id'],
-        'username':       u['username'],
-        'full_name':      u['full_name'],
-        'display_name':   disp_name,
-        'user_type':      u['user_type'],
-        'avatar':         u['avatar'],
-        'total_articles': u['total_articles'],
-        'total_comments': u['total_comments'],
-        'reputation':     u['reputation'],
-    }, notifications=notifs)
+        return jsonify(success=True, welcome=welcome, user={
+            'user_id':        u['user_id'],
+            'username':       u['username'],
+            'full_name':      u['full_name'],
+            'display_name':   disp_name,
+            'user_type':      u['user_type'],
+            'avatar':         u['avatar'] or '',
+            'total_articles': u['total_articles'] or 0,
+            'total_comments': u['total_comments'] or 0,
+            'reputation':     u['reputation'] or 1.0,
+        }, notifications=notifs)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify(success=False, message=f"Login error: {str(e)}")
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
@@ -983,6 +985,11 @@ def create_article():
         tags     = d.get('tags','')
         media_url  = d.get('media_url','')
         media_type = 'image' if media_url and not content else 'text'
+        save_as_draft = d.get('save_as_draft', False)
+    
+    # Check if save_as_draft was passed in multipart form
+    if request.content_type and 'multipart' in request.content_type:
+        save_as_draft = request.form.get('save_as_draft', '').lower() == 'true'
 
     if not title:
         return jsonify(success=False, message="Title is required")
@@ -999,18 +1006,28 @@ def create_article():
     reading_time = max(1, round(words/200))
     summary      = content[:200]+'...' if len(content) > 200 else content
 
+    status = 'draft' if save_as_draft else 'published'
     cur = db_connection.cursor()
     cur.execute('''INSERT INTO articles
-        (user_id,title,content,content_html,summary,media_url,media_type,category,tags,reading_time)
-        VALUES(?,?,?,?,?,?,?,?,?,?)''',
+        (user_id,title,content,content_html,summary,media_url,media_type,category,tags,reading_time,status)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?)''',
         (session['user_id'],title,content,content_html,summary,
-         media_url,media_type,category,tags,reading_time))
+         media_url,media_type,category,tags,reading_time,status))
     article_id = cur.lastrowid
-    db_connection.execute("UPDATE users SET total_articles=total_articles+1 WHERE user_id=?",
-                          (session['user_id'],))
+    
+    # Only increment total_articles for published articles
+    if not save_as_draft:
+        db_connection.execute("UPDATE users SET total_articles=total_articles+1 WHERE user_id=?",
+                              (session['user_id'],))
+    
     db_connection.commit()
-    _notify(session['user_id'], f"Your article '{title}' was published! 📰", 'success')
-    return jsonify(success=True, message="Article published!", article_id=article_id)
+    
+    if save_as_draft:
+        _notify(session['user_id'], f"Draft '{title}' saved! 📝", 'info')
+        return jsonify(success=True, message="Draft saved!", article_id=article_id, is_draft=True)
+    else:
+        _notify(session['user_id'], f"Your article '{title}' was published! 📰", 'success')
+        return jsonify(success=True, message="Article published!", article_id=article_id)
 
 @app.route('/api/articles/<int:article_id>/like', methods=['POST'])
 @login_required
@@ -1028,6 +1045,85 @@ def record_view(article_id):
     db_connection.execute("UPDATE articles SET views=views+1 WHERE article_id=?", (article_id,))
     db_connection.commit()
     return jsonify(success=True)
+
+@app.route('/api/drafts', methods=['GET'])
+@login_required
+def get_drafts():
+    """Get all drafts for the current user."""
+    cur = db_connection.cursor()
+    cur.execute('''SELECT article_id,title,summary,category,media_type,media_url,
+                          created_at,updated_at,tags
+                   FROM articles
+                   WHERE user_id=? AND status='draft'
+                   ORDER BY updated_at DESC, created_at DESC''', (session['user_id'],))
+    rows = cur.fetchall()
+    drafts = [dict(r) for r in rows]
+    return jsonify(success=True, drafts=drafts)
+
+@app.route('/api/drafts/<int:article_id>/publish', methods=['POST'])
+@login_required
+def publish_draft(article_id):
+    """Publish a draft article."""
+    cur = db_connection.cursor()
+    cur.execute("SELECT user_id, title FROM articles WHERE article_id=? AND status='draft'",
+                (article_id,))
+    article = cur.fetchone()
+    if not article:
+        return jsonify(success=False, message="Draft not found"), 404
+    if article['user_id'] != session['user_id']:
+        return jsonify(success=False, message="Not authorised"), 403
+    
+    db_connection.execute("UPDATE articles SET status='published' WHERE article_id=?",
+                          (article_id,))
+    db_connection.execute("UPDATE users SET total_articles=total_articles+1 WHERE user_id=?",
+                          (session['user_id'],))
+    db_connection.commit()
+    _notify(session['user_id'], f"Your article '{article['title']}' is now published! 📰", 'success')
+    return jsonify(success=True, message="Article published!")
+
+@app.route('/api/drafts/<int:article_id>', methods=['DELETE'])
+@login_required
+def delete_draft(article_id):
+    """Delete a draft article."""
+    cur = db_connection.cursor()
+    cur.execute("SELECT user_id FROM articles WHERE article_id=? AND status='draft'",
+                (article_id,))
+    article = cur.fetchone()
+    if not article:
+        return jsonify(success=False, message="Draft not found"), 404
+    if article['user_id'] != session['user_id']:
+        return jsonify(success=False, message="Not authorised"), 403
+    
+    db_connection.execute("DELETE FROM articles WHERE article_id=?", (article_id,))
+    db_connection.commit()
+    return jsonify(success=True, message="Draft deleted")
+
+@app.route('/api/articles/<int:article_id>', methods=['DELETE'])
+@login_required
+def delete_article(article_id):
+    """User can delete their own published article."""
+    cur = db_connection.cursor()
+    cur.execute("SELECT user_id, title, status FROM articles WHERE article_id=?", (article_id,))
+    article = cur.fetchone()
+    if not article:
+        return jsonify(success=False, message="Article not found"), 404
+    if article['user_id'] != session['user_id']:
+        return jsonify(success=False, message="Not authorised to delete this article"), 403
+    
+    # Delete all comments associated with this article first
+    db_connection.execute("DELETE FROM comments WHERE article_id=?", (article_id,))
+    
+    # Delete the article
+    db_connection.execute("DELETE FROM articles WHERE article_id=?", (article_id,))
+    
+    # Update user's total articles if it was published
+    if article['status'] == 'published':
+        db_connection.execute("UPDATE users SET total_articles=total_articles-1 WHERE user_id=? AND total_articles>0",
+                              (session['user_id'],))
+    
+    db_connection.commit()
+    _notify(session['user_id'], f"Your article '{article['title']}' has been deleted.", 'info')
+    return jsonify(success=True, message="Article deleted")
 
 # ══════════════════════════════════════════════════════════════════
 #  COMMENTS
@@ -1175,6 +1271,35 @@ def moderate_comment(comment_id):
     moderator.train(row['comment_text'], label)
 
     return jsonify(success=True, message=f"Comment {action}d")
+
+@app.route('/api/comments/<int:comment_id>/delete', methods=['DELETE'])
+@login_required
+def delete_comment(comment_id):
+    """Delete a comment. Admin, article author, or comment author can delete."""
+    cur = db_connection.cursor()
+    # Get comment and article info
+    cur.execute('''SELECT c.user_id as commenter_id, c.article_id,
+                          a.user_id as author_id
+                   FROM comments c JOIN articles a ON c.article_id=a.article_id
+                   WHERE c.comment_id=?''', (comment_id,))
+    row = cur.fetchone()
+    if not row:
+        return jsonify(success=False, message="Comment not found"), 404
+
+    is_admin           = session.get('user_type') == 'admin'
+    is_article_author  = row['author_id'] == session['user_id']
+    is_comment_author  = row['commenter_id'] == session['user_id']
+    
+    if not (is_admin or is_article_author or is_comment_author):
+        return jsonify(success=False, message="Not authorised"), 403
+
+    # Delete the comment
+    db_connection.execute("DELETE FROM comments WHERE comment_id=?", (comment_id,))
+    db_connection.execute("UPDATE users SET total_comments=total_comments-1 WHERE user_id=? AND total_comments>0",
+                          (row['commenter_id'],))
+    db_connection.commit()
+    
+    return jsonify(success=True, message="Comment deleted")
 
 # ══════════════════════════════════════════════════════════════════
 #  ADMIN ROUTES
