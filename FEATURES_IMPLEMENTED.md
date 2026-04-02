@@ -6,7 +6,7 @@
 - `DELETE /api/admin/articles/<article_id>/delete` - Admin-only endpoint to delete any article from any user
   - Deletes all associated comments
   - Updates user's article count
-  - Notifies the article author
+  - Notifies thev article author
   - Returns success/error message
 
 **Frontend:**
