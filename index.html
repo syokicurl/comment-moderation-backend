@@ -318,6 +318,17 @@ nav{padding:0 14px}main{padding:0 14px}
 .pstats,.stats-grid{grid-template-columns:1fr 1fr}
 .atab,.ptab{padding:7px 11px;font-size:.76rem}
 }
+
+/* ── HERO3D ANIMATIONS ── */
+@keyframes float-blob{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(-20px,-20px) scale(1.05)}50%{transform:translate(10px,30px) scale(0.95)}75%{transform:translate(-30px,10px) scale(1.02)}}
+@keyframes float-icon{0%{transform:translateY(0) rotate(0deg);opacity:0.3}50%{opacity:1}100%{transform:translateY(-80px) rotate(360deg);opacity:0}}
+.hero3d-container{position:relative;width:100%;height:300px;overflow:hidden;margin:32px 0;border-radius:20px}
+.hero3d-blob{position:absolute;width:300px;height:300px;background:radial-gradient(circle at 30% 30%,rgba(91,140,255,0.4),rgba(155,125,250,0.2));filter:blur(80px);animation:float-blob 7s infinite;border-radius:50%}
+.hero3d-icon{position:absolute;font-size:48px;animation:float-icon 4s ease-in infinite}
+.hero3d-icon:nth-child(2){animation-delay:0.5s}
+.hero3d-icon:nth-child(3){animation-delay:1s}
+.hero3d-icon:nth-child(4){animation-delay:1.5s}
+
 </style>
 </head>
 <body>
@@ -340,7 +351,7 @@ nav{padding:0 14px}main{padding:0 14px}
 <!-- BEFORE LOGIN: Auth Buttons -->
 <div id="auth-btns" style="display:flex;gap:7px;align-items:center">
 <button class="btn-auth btn-in" onclick="openM('m-login')">Sign In</button>
-<button class="btn-auth btn-up" onclick="openM('m-register')">Join Free</button>
+<button class="btn-auth btn-up" onclick="openM('m-register')">Sign Up</button>
 </div>
 
 <!-- AFTER LOGIN: User Nav -->
@@ -392,6 +403,16 @@ nav{padding:0 14px}main{padding:0 14px}
 <p>Earn points and badges as your content gains traction in the community.</p>
 </div>
 </div>
+
+<!-- Hero3D Animation -->
+<div class="hero3d-container">
+<div class="hero3d-blob"></div>
+<div class="hero3d-icon">📰</div>
+<div class="hero3d-icon">✍️</div>
+<div class="hero3d-icon">💬</div>
+<div class="hero3d-icon">🎯</div>
+</div>
+
 <div class="guest-cta">
 <button class="btn-primary" onclick="openM('m-register')">Get Started — It's Free</button>
 <button class="btn-outline" onclick="goPage('articles')">Browse Articles</button>
@@ -822,6 +843,31 @@ function catEmoji(c) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// HERO3D MOUSE TRACKING
+// ═══════════════════════════════════════════════════════════════
+
+function initHero3D() {
+    const container = document.querySelector('.hero3d-container');
+    if(!container) return;
+    
+    const blob = container.querySelector('.hero3d-blob');
+    if(!blob) return;
+    
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 40;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 40;
+        blob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1)`;
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        blob.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initHero3D);
+
+// ═══════════════════════════════════════════════════════════════
 // API HELPER with Error Handling [^2^]
 // ═══════════════════════════════════════════════════════════════
 
@@ -1130,7 +1176,21 @@ async function doRegister() {
 }
 
 async function doLogout() {
-    try{ await api('/api/logout',{method:'POST'}); }catch{}
+    try {
+        const response = await api('/api/logout', {method:'POST'});
+        if(response.success || !response.success) {
+            if(typeof(Storage) !== 'undefined') {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+        }
+    } catch(err) {
+        console.error('Logout error:', err);
+        if(typeof(Storage) !== 'undefined') {
+            localStorage.clear();
+            sessionStorage.clear();
+        }
+    }
     clearUser(); 
     goPage('home'); 
     toast('Signed out','info');

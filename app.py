@@ -703,8 +703,12 @@ def login():
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    session.clear()
-    return jsonify(success=True, message="Signed out")
+    try:
+        session.clear()
+        return jsonify(success=True, message="Signed out successfully")
+    except Exception as e:
+        print(f"Logout error: {str(e)}")
+        return jsonify(success=False, message="Logout error"), 500
 
 @app.route('/api/session', methods=['GET'])
 def check_session():
