@@ -642,7 +642,7 @@ def register():
         uid = cur.lastrowid
         db_connection.commit()
         _notify(uid, f"Welcome to the platform, {d['full_name']}! 🎉")
-        return jsonify(success=True, message="Account created successfully! You can now sign in.")
+        return jsonify(success=True, message="Account created successfully! Redirecting to login...", redirect_to_login=True)
     except Exception as e:
         db_connection.rollback()
         return jsonify(success=False, message=f"Error: {str(e)}")
@@ -1354,6 +1354,68 @@ def toggle_user(uid):
     db_connection.execute("UPDATE users SET is_active=? WHERE user_id=?", (new_val, uid))
     db_connection.commit()
     return jsonify(success=True, message=f"User {'activated' if new_val else 'suspended'}")
+
+@app.route('/api/admin/users/<int:uid>/block', methods=['PUT'])
+@admin_required
+def block_user(uid):
+    """Admin endpoint to block a user from using the website."""
+    if uid == session.get('user_id'):
+        return jsonify(success=False, message="You cannot block yourself"), 400
+    cur = db_connection.cursor()
+    cur.execute("SELECT username, is_active FROM users WHERE user_id=?", (uid,))
+    r = cur.fetchone()
+    if not r: 
+        return jsonify(success=False, message="User not found"), 404
+    if not r['is_active']:
+        return jsonify(success=False, message="User is already blocked")
+    db_connection.execute("UPDATE users SET is_active=0 WHERE user_id=?", (uid,))
+    db_connection.commit()
+    _notify(uid, "Your account has been blocked by an administrator. Please contact support." , 'error')
+    return jsonify(success=True, message=f"User {r['username']} has been blocked")
+
+@app.route('/api/admin/users/<int:uid>/unblock', methods=['PUT'])
+@admin_required
+def unblock_user(uid):
+    """Admin endpoint to unblock a user."""
+    cur = db_connection.cursor()
+    cur.execute("SELECT username, is_active FROM users WHERE user_id=?", (uid,))
+    r = cur.fetchone()
+    if not r: 
+        return jsonify(success=False, message="User not found"), 404
+    if r['is_active']:
+        return jsonify(success=False, message="User is already active")
+    db_connection.execute("UPDATE users SET is_active=1 WHERE user_id=?", (uid,))
+    db_connection.commit()
+    _notify(uid, "Your account has been unblocked! You can now log in." , 'success')
+    return jsonify(success=True, message=f"User {r['username']} has been unblocked")
+
+@app.route('/api/admin/articles/<int:article_id>/delete', methods=['DELETE'])
+@admin_required
+def admin_delete_article(article_id):
+    """Admin endpoint to delete any article from any user."""
+    cur = db_connection.cursor()
+    cur.execute("SELECT user_id, title, status, media_url FROM articles WHERE article_id=?", (article_id,))
+    article = cur.fetchone()
+    if not article:
+        return jsonify(success=False, message="Article not found"), 404
+    
+    # Delete all comments associated with this article
+    db_connection.execute("DELETE FROM comments WHERE article_id=?", (article_id,))
+    
+    # Delete the article
+    db_connection.execute("DELETE FROM articles WHERE article_id=?", (article_id,))
+    
+    # Update user's total articles if it was published
+    if article['status'] == 'published':
+        db_connection.execute("UPDATE users SET total_articles=total_articles-1 WHERE user_id=? AND total_articles>0",
+                              (article['user_id'],))
+    
+    db_connection.commit()
+    
+    # Notify the article author
+    _notify(article['user_id'], f"Your article '{article['title']}' has been deleted by an administrator.", 'warning')
+    
+    return jsonify(success=True, message=f"Article '{article['title']}' has been deleted")
 
 @app.route('/api/admin/blocked-domains', methods=['GET'])
 @admin_required
